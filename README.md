@@ -10,6 +10,7 @@ This package contains the code for the paper:
 - For the code for this repository, see [https://github.com/alexsax/visual-prior](https://github.com/alexsax/visual-prior).
 - For the full code from the paper, dockers to reproduce experiments, and more, see [https://github.com/alexsax/midlevel-reps](https://github.com/alexsax/midlevel-reps).
 - This repository contains additional functionality to use the models as a pretaining alternative and more efficient reuse
+- Fixed max_coverage_featureset_transform
 
 ### Citation
 If you find this repository or toolkit useful, then please cite:
