@@ -42,7 +42,7 @@ def max_coverage_featureset_transform(img, k=4, device=default_device):
         Outputs:
             shape  (batch_size, 8*k, 16, 16)
     '''
-    return VisualPrior.max_coverage_transform(img, feature_tasks, device)
+    return VisualPrior.max_coverage_transform(img, k, device)
 
 def feature_readout(img, feature_task='normal', device=default_device):
     '''
@@ -68,6 +68,36 @@ def multi_feature_readout(img, feature_tasks=['normal'], device=default_device):
     '''
     return VisualPrior.to_predicted_label(img, feature_tasks, device)
 
+def get_networks(feature_tasks, train=False, decoder=False, device=torch.device('cpu')):
+    '''
+    Return taskonomy encoder (and decoder) (with or) without gradients.
+        Expects inputs:
+            feature_tasks list
+            train  bool
+            decoder bool
+            device torch.device
+        Outputs:
+            list(nn.Module)
+    '''
+    return VisualPrior.get_nets(feature_tasks, train, decoder, device)
+
+def get_viable_feature_tasks():
+    '''
+    Return viable feature tasks as list of strings.
+    
+        Outputs:
+            list(str)
+    '''
+    return VisualPrior.viable_feature_tasks
+
+def get_max_coverate_featuresets():
+    '''
+    Return max coverate featuresets as list of list of strings.
+    
+        Outputs:
+            list(list(str))
+    '''
+    return VisualPrior.max_coverate_featuresets
 
 
 class VisualPrior(object):
@@ -151,13 +181,38 @@ class VisualPrior(object):
         assert k > 0, 'Number of features to use for the max_coverage_transform must be > 0'
         if k > 4:
             raise NotImplementedError("max_coverage_transform featureset not implemented for k > 4")
-        return cls.to_representation(img, feature_tasks=max_coverate_featuresets[k - 1], device=device)
+        return cls.to_representation(img, feature_tasks=cls.max_coverate_featuresets[k - 1], device=device)
 
     @classmethod
-    def set_model_dir(model_dir):
+    def set_model_dir(cls, model_dir):
         cls.model_dir = model_dir
 
-    
+    @classmethod
+    def get_nets(cls, feature_tasks, train, decoder, device):
+        
+        if decoder:
+            if len(feature_tasks) == 1:
+                VisualPriorPredictedLabel._load_unloaded_nets(feature_tasks)
+                for t in feature_tasks:
+                    VisualPriorPredictedLabel.feature_task_to_net[t] = VisualPriorPredictedLabel.feature_task_to_net[t].to(device)
+                nets = [VisualPriorPredictedLabel.feature_task_to_net[t] for t in feature_tasks]
+            else:
+                raise NotImplementedError("Decoder retrieval only implemented for single feature task.")
+        else:   
+            VisualPriorRepresentation._load_unloaded_nets(feature_tasks)
+            for t in feature_tasks:
+                VisualPriorRepresentation.feature_task_to_net[t] = VisualPriorRepresentation.feature_task_to_net[t].to(device)
+            nets = [VisualPriorRepresentation.feature_task_to_net[t] for t in feature_tasks]
+        
+        if train:
+            for net in nets:
+                # method override in taskonomy_network.py -> TaskonomyNetwork
+                net.train(False)
+                for p in net.parameters():
+                    p.requires_grad = True
+        
+        return nets
+
 class VisualPriorRepresentation(object):
     '''
         Handles loading networks that transform images into encoded features.
