@@ -1,4 +1,4 @@
-# Visual Priors
+# Visual Priors (Dev)
 
 
 # Intro
@@ -9,7 +9,7 @@ This package contains the code for the paper:
 - For a fuller description and useful results and demos, and much more, see the website [http://perceptual.actor](http://perceptual.actor).
 - For the code for this repository, see [https://github.com/alexsax/visual-prior](https://github.com/alexsax/visual-prior).
 - For the full code from the paper, dockers to reproduce experiments, and more, see [https://github.com/alexsax/midlevel-reps](https://github.com/alexsax/midlevel-reps).
-
+- This repository contains additional functionality to use the models as a pretaining alternative and more efficient reuse
 
 ### Citation
 If you find this repository or toolkit useful, then please cite:
